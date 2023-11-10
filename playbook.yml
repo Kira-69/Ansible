@@ -1,0 +1,46 @@
+---
+  - name: Deploy Configuration
+    hosts: all
+    tasks:
+      - name: Create 'git-projects' directory
+        file:
+          path: /home/student16/git-projects
+          state: directory
+
+      - name: Clone the 'neofetch' repository into 'git-projects'
+        ansible.builtin.git:
+          repo: https://github.com/dylanaraps/neofetch.git
+          dest: /home/student16/git-projects/neofetch
+          clone: yes
+          update: yes
+
+      - name: Generate the "about_me" file
+        ansible.builtin.template:
+          src: about_me
+          dest: "/home/student16/about_me"
+        vars:
+          user_name: '{{ ansible_user }}'
+          student_name: "Кирилл"
+          student_group: "51-11"
+
+      - name: Get the server's public IP address
+        uri:
+          url: https://ifconfig.me/
+          return_content: yes
+        register: ip_address
+      
+      - name: Show Ip address
+        debug:
+          msg: 'IP address: {{ ip_address }}'
+
+      - name: 'write info server info'
+        lineinfile:
+          path: /home/student16/server_info
+          creates: yes
+          line: '{{item}}: {{ansible_facts[item] | default(omit)}}'
+        with_items:
+          - ansible_architecture
+          - ansible_distribution
+          - ansible_procrssor
+          - ansible_virtulization_type
+        when: ansible_facts[item] is defined

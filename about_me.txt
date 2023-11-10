@@ -1,0 +1,3 @@
+- username: {{ user_name }}
+- Name: {{ student_name }}
+- Group: {{ student_group }}
